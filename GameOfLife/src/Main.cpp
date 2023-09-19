@@ -25,8 +25,10 @@ int kbhit()
 int main()
 {
     GameOfLife game;
+
+    clearScreen();
+    initialize();
     std::thread gameThread(&GameOfLife::start, &game);
-    hideCursor();
 
     while (true) {
 #ifdef _WIN32
@@ -34,8 +36,7 @@ int main()
 #else
         if (!kbhit()) {
             continue;
-    }
-
+        }
         char key = getch();
 #endif
         switch (key) {
@@ -52,7 +53,7 @@ int main()
                 game.decreaseSpeed();
                 break;
             case 'q':                 
-                showCursor();
+                quit();
                 game.stop();
                 return 0;
             default:
