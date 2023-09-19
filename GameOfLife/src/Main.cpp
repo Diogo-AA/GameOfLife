@@ -1,7 +1,26 @@
-#include <thread>
+#ifdef _WIN32
 #include <conio.h>
+#else
+#include <ncurses.h>
+#endif
+#include <thread>
 #include "GameOfLife.h"
 #include "Log.h"
+
+#ifndef _WIN32
+int kbhit()
+{
+    int ch = getch();
+
+    if (ch != ERR) {
+        ungetch(ch);
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+#endif
 
 int main()
 {
@@ -10,7 +29,15 @@ int main()
     hideCursor();
 
     while (true) {
+#ifdef _WIN32
         char key = _getch();
+#else
+        if (!kbhit()) {
+            continue;
+    }
+
+        char key = getch();
+#endif
         switch (key) {
             case 'p': 
                 game.togglePause();
@@ -27,7 +54,7 @@ int main()
             case 'q':                 
                 showCursor();
                 game.stop();
-                exit(0);
+                return 0;
             default:
                 break;
         }

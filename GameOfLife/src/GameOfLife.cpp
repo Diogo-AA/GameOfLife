@@ -1,6 +1,9 @@
 #ifdef _WIN32
 #include <Windows.h>
+#else
+#include <ncurses.h>
 #endif
+#include <string.h>
 #include <iostream>
 #include <thread>
 #include <cstdlib>
@@ -30,9 +33,15 @@ void GameOfLife::restartBoard() {
 void GameOfLife::showBoard() {
     for (int i = 0; i < BOARD_ROWS; i++) {
         for (int j = 0; j < BOARD_COLS; j++) {
-            std::cout << board[i][j] << " ";
+            char* string = (char*)malloc(3*sizeof(char));
+            if (string != NULL) {
+                string[0] = board[i][j];
+                string[1] = ' ';
+                string[2] = '\0';
+                print(string);
+            }
         }
-        std::cout << std::endl;
+        print("\n");
     }
     showControls();
 }
@@ -54,13 +63,15 @@ void GameOfLife::updateBoard() {
     }
     SetConsoleCursorPosition(hConsole, originalPos);
 #else
-    for (const std::vector<int> pos : positionsToChange)
+    int rowOriginal, colOriginal;
+    getyx(stdscr, rowOriginal, colOriginal);
+    for (const std::vector<int>& pos : positionsToChange)
     {
-        std::cout << "\033[s";
-        std::cout << "\033[" << pos[0] << ";" << pos[1] << "H";
-        std::cout << board[pos[0]][pos[1]];
-        std::cout << "\033[u";
+        move(pos[0], pos[1] * 2);
+        printw("%c", board[pos[0]][pos[1]]);
     }
+    move(rowOriginal, colOriginal);
+    refresh();
 #endif
 }
 

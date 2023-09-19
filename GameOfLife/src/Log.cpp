@@ -1,16 +1,26 @@
 #ifdef _WIN32
 #include <Windows.h>
+#else
+#include <ncurses.h>
 #endif
 #include <iostream>
 #include "Log.h"
 
+void print(const char* string) {
+#ifdef _WIN32
+	std::cout << string;
+#else
+	printw("%s", string);
+#endif
+}
+
 void showControls() {
-	std::cout << "\nControls:\n";
-	std::cout << "p - resume/pause\n";
-	std::cout << "r - restart\n";
-	std::cout << "w - increase speed\n";
-	std::cout << "s - decrease speed\n";
-	std::cout << "q - quit\n";
+	print("\nControls:\n");
+	print("p - resume/pause\n");
+	print("r - restart\n");
+	print("w - increase speed\n");
+	print("s - decrease speed\n");
+	print("q - quit\n");
 }
 
 void showCursor() {
@@ -22,7 +32,7 @@ void showCursor() {
 	cursorInfo.bVisible = true; // true to show, false to hide
 	SetConsoleCursorInfo(out, &cursorInfo);
 #else
-	printf("\e[?25h"); //show cursor
+	curs_set(TRUE); //show cursor
 #endif
 }
 
@@ -35,6 +45,31 @@ void hideCursor() {
 	cursorInfo.bVisible = false; // true to show, false to hide
 	SetConsoleCursorInfo(out, &cursorInfo);
 #else
-	printf("\e[?25l"); //hide cursor
+	curs_set(FALSE); //hide cursor
 #endif
+}
+
+void clearScreen() {
+#ifdef _WIN32
+	system("cls");
+#else
+	system("clear");
+#endif
+}
+
+void initialize() {
+	hideCursor();
+#ifndef _WIN32
+	initscr();
+	timeout(-1);
+	cbreak();
+	noecho();
+#endif
+}
+
+void quit() {
+#ifndef _WIN32
+	endwin();
+#endif
+	showCursor();
 }
